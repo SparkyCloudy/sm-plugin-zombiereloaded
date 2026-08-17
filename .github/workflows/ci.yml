@@ -5,10 +5,15 @@ on: [push, pull_request, workflow_dispatch]
 jobs:
   build:
     name: "Build"
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04]
+        include:
+          - os: ubuntu-24.04
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Setup Sourceknight
         uses: SparkyCloudy/sourceknight@v0.5.0
@@ -19,21 +24,18 @@ jobs:
 
       - name: Create package
         run: |
-          set -euo pipefail
-          mkdir -p /tmp/package/addons/sourcemod/plugins
-          cp src/addons/sourcemod/plugins/*.smx /tmp/package/addons/sourcemod/plugins/
-          if [ -d "common" ]; then
-            cp -R common/* /tmp/package/
-          fi
+          mkdir -p /tmp/package
+          cp -R src/addons/sourcemod/plugins/*.smx /tmp/package/
+          cp -R common /tmp/package
 
       - name: Upload build archive for test runners
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ runner.os }}
           path: /tmp/package
 
       - name: Upload Compile Report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: compile-report
@@ -44,7 +46,7 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
 
       - uses: dev-drprasad/delete-tag-and-release@v1.1
@@ -68,14 +70,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: ${{ runner.os }}
           path: artifacts
 
       - name: Versioning
         run: |
-          set -euo pipefail
           version="latest"
           if [[ "${{ github.ref_type }}" == 'tag' ]]; then
             version=`echo $GITHUB_REF | sed "s/refs\/tags\///"`;
@@ -84,10 +85,11 @@ jobs:
 
       - name: Package
         run: |
-          set -euo pipefail
           cd artifacts
+          ls -Rall
           tar -czf ../${{ github.event.repository.name }}-${{ env.RELEASE_VERSION }}.tar.gz .
           cd ..
+          ls -la *.tar.gz
 
       - name: Release
         uses: svenstaro/upload-release-action@v2
