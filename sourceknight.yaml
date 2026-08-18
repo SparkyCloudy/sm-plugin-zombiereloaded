@@ -1,0 +1,37 @@
+project:
+  sourceknight: 0.6
+  name: zombiereloaded
+  dependencies:
+    - name: sourcemod
+      type: smdrop
+      version: 1.12
+      unpack:
+        - source: /addons
+          dest: /addons
+
+    - name: multicolors
+      type: git
+      repo: https://github.com/srcdslab/sm-plugin-MultiColors
+      unpack:
+        - source: /addons
+          dest: /addons
+
+    - name: afkmanager
+      type: git
+      repo: https://github.com/srcdslab/sm-plugin-AFKManager
+      unpack:
+        - source: /addons
+          dest: /addons
+
+    - name: teammanager
+      type: git
+      repo: https://github.com/srcdslab/sm-plugin-TeamManager
+      unpack:
+        - source: /addons
+          dest: /addons
+
+  root: /src
+  output: /src/addons/sourcemod/plugins
+
+  targets:
+    - zombiereloaded

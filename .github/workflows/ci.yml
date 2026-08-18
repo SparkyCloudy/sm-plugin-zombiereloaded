@@ -6,27 +6,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - name: Setup SourcePawn compiler
-        uses: rumblefrog/setup-sp@v1.3.1
+      - name: Setup Sourceknight
+        uses: SparkyCloudy/sourceknight@master
         with:
-          version: "1.12.x"
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Install dependencies
-        run: |
-          set -euo pipefail
-          mkdir -p addons/sourcemod/scripting/include
-          git clone --depth=1 https://github.com/srcdslab/sm-plugin-MultiColors.git deps/multicolors
-          cp -R deps/multicolors/addons/sourcemod/scripting/include/* addons/sourcemod/scripting/include/
-          git clone --depth=1 https://github.com/srcdslab/sm-plugin-AFKManager.git deps/afkmanager
-          cp -R deps/afkmanager/addons/sourcemod/scripting/include/* addons/sourcemod/scripting/include/
-          git clone --depth=1 https://github.com/srcdslab/sm-plugin-TeamManager.git deps/teammanager
-          cp -R deps/teammanager/addons/sourcemod/scripting/include/* addons/sourcemod/scripting/include/
+          cache: false
+
       - name: Build sourcemod plugin
-        working-directory: src/addons/sourcemod/scripting
         run: |
-          set -euo pipefail
-          mkdir -p ../plugins
-          spcomp -i include -i "$GITHUB_WORKSPACE/addons/sourcemod/scripting/include" -o ../plugins/zombiereloaded.smx zombiereloaded.sp
+          sourceknight build
+
       - name: Create package
         run: |
           set -euo pipefail
